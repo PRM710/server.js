@@ -7,7 +7,7 @@ const PORT = process.env.PORT || 5000; // Use Render-assigned port
 
 // Enable CORS
 const corsOptions = {
-    origin: ["http://localhost:5173", "https://advoice-online.vercel.app"], 
+    origin: ["http://localhost:5173", "https://advoice-online-livid.vercel.app/login.html"], 
     methods: ["GET", "HEAD"]
 };
 app.use(cors(corsOptions));
