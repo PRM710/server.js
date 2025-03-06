@@ -73,17 +73,25 @@ async function fetchAndLogData() {
 // ✅ API to Fetch Data via HTTP
 app.get("/get-keys", async (req, res) => {
     try {
-        console.log("📡 Fetching data via API request...");
+        const { assignedTo, licenseKey } = req.query; // Get user input from frontend
 
-        const keys = await AccessKey.find({});
-        
-        console.log("✅ API Response:", JSON.stringify(keys, null, 2));
-        res.json(keys);
+        if (!assignedTo || !licenseKey) {
+            return res.status(400).json({ error: "Missing assignedTo or licenseKey parameter" });
+        }
+
+        const user = await AccessKey.findOne({ assignedTo, licenseKey }, { _id: 0, assignedTo: 1, licenseKey: 1 });
+
+        if (!user) {
+            return res.status(404).json({ error: "Invalid credentials" });
+        }
+
+        res.json(user);
     } catch (error) {
-        console.error("❌ Database error:", error);
+        console.error("Database error:", error);
         res.status(500).json({ error: "Database error", details: error.message });
     }
 });
+
 
 // ✅ Start Server
 const PORT = process.env.PORT || 5000;
