@@ -6,7 +6,7 @@ const app = express();
 app.use(express.json());
 
 // ✅ Fix CORS
-const allowedOrigins = ["http://localhost:5173"];
+const allowedOrigins = ["https://online-advoice.vercel.app"];
 app.use(
     cors({
         origin: allowedOrigins,
