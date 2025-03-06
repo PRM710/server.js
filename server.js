@@ -5,44 +5,67 @@ const cors = require("cors");
 const app = express();
 app.use(express.json());
 
-// Fix CORS Configuration
+// ✅ Fix CORS
+const allowedOrigins = ["http://localhost:5173"];
 app.use(
     cors({
-        origin: "http://localhost:5173", // Allow only your frontend
+        origin: allowedOrigins,
         methods: "GET,POST,PUT,DELETE",
-        credentials: true // Allow credentials like cookies & authentication headers
+        credentials: true
     })
 );
 
-mongoose.connect("mongodb+srv://prakashprm710:ZbrCvUh8uDwDbdEm@cluster0.aovl7.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0", {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
+// ✅ Connect to MongoDB (`advoice` Database)
+mongoose
+    .connect("mongodb+srv://prakashprm710:ZbrCvUh8uDwDbdEm@cluster0.aovl7.mongodb.net/advoice?retryWrites=true&w=majority&appName=Cluster0")
+    .then(() => {
+        console.log("✅ MongoDB connected to 'advoice' database");
+        fetchAndLogData(); // Fetch & Log data in terminal on startup
+    })
+    .catch(err => console.error("❌ MongoDB connection error:", err));
+
+mongoose.connection.on("error", err => {
+    console.error("❌ MongoDB Error:", err);
 });
 
-// Define Schema
-const accessKeySchema = new mongoose.Schema({
-    assignedTo: { type: String, required: true },
-    licenseKey: { type: String, required: true }
-});
-
+// ✅ Define Schema (Fetch All Fields)
+const accessKeySchema = new mongoose.Schema({}, { strict: false });
 const AccessKey = mongoose.model("AccessKey", accessKeySchema, "access_keys");
 
-// API Endpoint to Fetch licenseKey & assignedTo
+// ✅ Function to Fetch & Log Data on Startup
+async function fetchAndLogData() {
+    try {
+        console.log("📡 Fetching all data from 'advoice.access_keys'...");
+
+        const keys = await AccessKey.find({});
+        
+        if (!keys.length) {
+            console.warn("⚠️ No data found in 'access_keys' collection.");
+        } else {
+            console.log("✅ Fetched Data:", JSON.stringify(keys, null, 2)); // Logs data in readable format
+        }
+    } catch (error) {
+        console.error("❌ Error fetching data:", error);
+    }
+}
+
+// ✅ API to Fetch Data via HTTP
 app.get("/get-keys", async (req, res) => {
     try {
-        res.setHeader("Access-Control-Allow-Origin", "http://localhost:5173"); // Set specific frontend origin
-        res.setHeader("Access-Control-Allow-Credentials", "true"); // Allow credentials
+        console.log("📡 Fetching data via API request...");
 
-        const keys = await AccessKey.find({}, { assignedTo: 1, licenseKey: 1, _id: 0 });
+        const keys = await AccessKey.find({});
+        
+        console.log("✅ API Response:", JSON.stringify(keys, null, 2));
         res.json(keys);
     } catch (error) {
-        console.error("Database error:", error);
+        console.error("❌ Database error:", error);
         res.status(500).json({ error: "Database error", details: error.message });
     }
 });
 
-// Start Server
+// ✅ Start Server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+    console.log(`🚀 Server running on port ${PORT}`);
 });
