@@ -5,15 +5,36 @@ const cors = require("cors");
 const app = express();
 app.use(express.json());
 
-// ✅ Fix CORS
+// ✅ Fix CORS Issue
 const allowedOrigins = ["https://online-advoice.vercel.app"];
+
 app.use(
     cors({
-        origin: allowedOrigins,
-        methods: "GET,POST,PUT,DELETE",
+        origin: function (origin, callback) {
+            if (!origin || allowedOrigins.includes(origin)) {
+                callback(null, true);
+            } else {
+                callback(new Error("Not allowed by CORS"));
+            }
+        },
+        methods: "GET, POST, PUT, DELETE",
         credentials: true
     })
 );
+
+// ✅ Additional Middleware to Ensure CORS Headers
+app.use((req, res, next) => {
+    res.header("Access-Control-Allow-Origin", "https://online-advoice.vercel.app");
+    res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
+    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    res.header("Access-Control-Allow-Credentials", "true");
+    
+    if (req.method === "OPTIONS") {
+        return res.sendStatus(204);
+    }
+
+    next();
+});
 
 // ✅ Connect to MongoDB (`advoice` Database)
 mongoose
@@ -38,11 +59,11 @@ async function fetchAndLogData() {
         console.log("📡 Fetching all data from 'advoice.access_keys'...");
 
         const keys = await AccessKey.find({});
-        
+
         if (!keys.length) {
             console.warn("⚠️ No data found in 'access_keys' collection.");
         } else {
-            console.log("✅ Fetched Data:", JSON.stringify(keys, null, 2)); // Logs data in readable format
+            console.log("✅ Fetched Data:", JSON.stringify(keys, null, 2));
         }
     } catch (error) {
         console.error("❌ Error fetching data:", error);
