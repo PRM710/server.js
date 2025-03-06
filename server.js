@@ -6,7 +6,7 @@ const app = express();
 app.use(express.json());
 
 // ✅ Fix CORS Issue
-const allowedOrigins = ["https://online-advoice.vercel.app"];
+const allowedOrigins = ["advoice-online-neon.vercel.app"];
 
 app.use(
     cors({
