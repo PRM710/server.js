@@ -6,7 +6,7 @@ const app = express();
 app.use(express.json());
 
 // ✅ Fix CORS Issue
-const allowedOrigins = ["advoice-online-neon.vercel.app"];
+const allowedOrigins = ["https://advoice-online-neon.vercel.app/"];
 
 app.use(
     cors({
@@ -24,7 +24,7 @@ app.use(
 
 // ✅ Additional Middleware to Ensure CORS Headers
 app.use((req, res, next) => {
-    res.header("Access-Control-Allow-Origin", "https://online-advoice.vercel.app");
+    res.header("Access-Control-Allow-Origin", "https://advoice-online-neon.vercel.app/");
     res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
     res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
     res.header("Access-Control-Allow-Credentials", "true");
