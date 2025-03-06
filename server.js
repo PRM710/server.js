@@ -1,29 +1,16 @@
-import express from "express";
-import mongoose from "mongoose";
-import cors from "cors";
+const express = require("express");
+const mongoose = require("mongoose");
+const cors = require("cors");
 
 const app = express();
-const PORT = process.env.PORT || 5000; // Use Render-assigned port
+app.use(express.json());
+app.use(cors());
 
-// Enable CORS
-const corsOptions = {
-    origin: ["https://advoice-online-livid.vercel.app", "http://localhost:5173"], // ✅ Allow entire frontend domain
-    methods: ["GET", "HEAD"],
-    credentials: true // ✅ Allow credentials if needed
-};
-app.use(cors(corsOptions));
-
-// MongoDB Connection
-const mongoURI = "mongodb+srv://prakashprm710:ZbrCvUh8uDwDbdEm@cluster0.aovl7.mongodb.net/advoice?retryWrites=true&w=majority&appName=Cluster0";
-
-mongoose.connect(mongoURI, {
+mongoose.connect("mongodb+srv://prakashprm710:ZbrCvUh8uDwDbdEm@cluster0.aovl7.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0", {
     useNewUrlParser: true,
     useUnifiedTopology: true
-})
-.then(() => console.log("✅ MongoDB connected"))
-.catch(err => console.error("❌ MongoDB connection error:", err));
+});
 
-// Define Schema
 const accessKeySchema = new mongoose.Schema({
     assignedTo: String,
     licenseKey: String
@@ -31,27 +18,16 @@ const accessKeySchema = new mongoose.Schema({
 
 const AccessKey = mongoose.model("AccessKey", accessKeySchema, "access_keys");
 
-// API Endpoint
-app.get("/api/get-keys", async (req, res) => {
+// API Endpoint to Fetch licenseKey & assignedTo
+app.get("/get-keys", async (req, res) => {
     try {
-        const { assignedTo } = req.query;
-        if (!assignedTo) {
-            return res.status(400).json({ error: "Missing assignedTo parameter" });
-        }
-
-        const userKey = await AccessKey.findOne({ assignedTo }, { assignedTo: 1, licenseKey: 1, _id: 0 });
-
-        if (!userKey) {
-            return res.status(404).json({ error: "User not found" });
-        }
-
-        res.json(userKey);
+        const keys = await AccessKey.find({}, { assignedTo: 1, licenseKey: 1, _id: 0 });
+        res.json(keys);
     } catch (error) {
         res.status(500).json({ error: "Database error", details: error.message });
     }
 });
 
-// Start Server
-app.listen(PORT, () => {
-    console.log(`✅ Server running on port ${PORT}`);
+app.listen(5000, () => {
+    console.log("Server running on port 5000");
 });
