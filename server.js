@@ -6,7 +6,7 @@ const app = express();
 app.use(express.json());
 
 // ✅ Fix CORS Issue
-const allowedOrigins = ["https://advoice-online-neon.vercel.app/"];
+const allowedOrigins = ["https://advoice-online-neon.vercel.app"];
 
 app.use(
     cors({
@@ -17,20 +17,21 @@ app.use(
                 callback(new Error("Not allowed by CORS"));
             }
         },
-        methods: "GET, POST, PUT, DELETE",
+        methods: "GET, POST, PUT, DELETE, OPTIONS",
+        allowedHeaders: "Content-Type, Authorization",
         credentials: true
     })
 );
 
-// ✅ Additional Middleware to Ensure CORS Headers
+// ✅ Ensure CORS Headers Are Sent in Every Response
 app.use((req, res, next) => {
-    res.header("Access-Control-Allow-Origin", "https://advoice-online-neon.vercel.app/");
-    res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
+    res.header("Access-Control-Allow-Origin", "https://advoice-online-neon.vercel.app");
+    res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
     res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
     res.header("Access-Control-Allow-Credentials", "true");
-    
+
     if (req.method === "OPTIONS") {
-        return res.sendStatus(204);
+        return res.sendStatus(204); // Respond to preflight request
     }
 
     next();
@@ -91,7 +92,6 @@ app.get("/get-keys", async (req, res) => {
         res.status(500).json({ error: "Database error", details: error.message });
     }
 });
-
 
 // ✅ Start Server
 const PORT = process.env.PORT || 5000;
