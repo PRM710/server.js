@@ -6,7 +6,11 @@ const app = express();
 app.use(express.json());
 
 // ✅ Fix CORS Issue
-const allowedOrigins = ["https://advoice-online-neon.vercel.app"];
+const allowedOrigins = [
+  "https://advoice-online-neon.vercel.app",
+  "http://localhost:5173"
+];
+
 
 app.use(
     cors({
